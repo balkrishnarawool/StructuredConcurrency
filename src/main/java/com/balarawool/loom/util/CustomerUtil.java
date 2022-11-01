@@ -1,31 +1,21 @@
-package com.balarawool.loom;
+package com.balarawool.loom.util;
+
+import static com.balarawool.loom.util.ThreadUtil.logAndWait;
 
 public class CustomerUtil {
 
     public static Customer getCurrentCustomer() {
-        try {
-            Thread.sleep(2_000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        logAndWait("getCurrentCustomer", 2);
         return new Customer();
     }
 
     public static Savings getSavingsData(Customer customer) {
-        try {
-            Thread.sleep(2_000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        logAndWait("getSavingsData", 2);
         return new Savings(customer);
     }
 
     public static Loans getLoansData(Customer customer) {
-        try {
-            Thread.sleep(2_000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        logAndWait("getLoansData", 2);
         return new Loans(customer);
     }
     public record Customer() {}

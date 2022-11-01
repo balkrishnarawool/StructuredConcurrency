@@ -143,13 +143,17 @@ And with structured concurrency:
     }
 
 ## Pre-requisites:
+
 - Project Loom early access build.
 You would need get early access build with support for structured concurrency.
 You can get one from here: https://jdk.java.net/loom/
 These are builds based on JDK 20.
+
 - Make sure you use ``--enable-preview`` for build and run.
 If you are using IntelliJ:
     - Make sure to enable preview for Java Compiler:
+  
   ![Java Compiler Settings](./images/java_compiler_settings.png)
     - Make sure to enbale preview in 'Run Configurations...'
+  
   ![Run Configurations Settings](./images/run_configurations_settings.png)

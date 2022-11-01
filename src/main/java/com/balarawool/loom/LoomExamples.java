@@ -1,5 +1,10 @@
 package com.balarawool.loom;
 
+import com.balarawool.loom.util.EventUtil;
+import com.balarawool.loom.util.CustomerUtil;
+import com.balarawool.loom.util.CustomerUtil.CustomerDetails;
+import com.balarawool.loom.util.GamesUtil;
+import com.balarawool.loom.util.StockUtil;
 import jdk.incubator.concurrent.StructuredTaskScope;
 
 public class LoomExamples {
@@ -59,7 +64,7 @@ public class LoomExamples {
             var savings = future2.resultNow();
             var loans = future3.resultNow();
 
-            System.out.println("Customer details: " + new CustomerUtil.CustomerDetails(savings, loans));
+            System.out.println("Customer details: " + new CustomerDetails(savings, loans));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

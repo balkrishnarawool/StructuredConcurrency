@@ -1,16 +1,13 @@
-package com.balarawool.loom;
+package com.balarawool.loom.util;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+
+import static com.balarawool.loom.util.ThreadUtil.logAndWait;
 
 public class GamesUtil {
 
     public static Player getPlayer() {
-        try {
-            Thread.sleep(5_000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        logAndWait("getPlayer", 5);
         return new Player("Virat Kohli", new Performance(List.of(new Score(87), new Score(97), new Score(107), new Score(37), new Score(127))));
     }
 

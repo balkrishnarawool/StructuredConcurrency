@@ -2,7 +2,11 @@ package com.balarawool.loom;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.balarawool.loom.CustomerUtil.CustomerDetails;
+import com.balarawool.loom.util.CustomerUtil;
+import com.balarawool.loom.util.CustomerUtil.CustomerDetails;
+import com.balarawool.loom.util.EventUtil;
+import com.balarawool.loom.util.GamesUtil;
+import com.balarawool.loom.util.StockUtil;
 
 public class CFExamples {
 
@@ -44,8 +48,8 @@ public class CFExamples {
 
     public static void thenCombine() {
         var future1 = CompletableFuture.supplyAsync(CustomerUtil::getCurrentCustomer);
-        var future2 = future1.thenApply(CustomerUtil::getSavingsData);
-        var future3 = future1.thenApply(CustomerUtil::getLoansData);
+        var future2 = future1.thenApplyAsync(CustomerUtil::getSavingsData);
+        var future3 = future1.thenApplyAsync(CustomerUtil::getLoansData);
 
         var future = future2.thenCombine(future3, (savings, loans) -> new CustomerDetails(savings, loans));
 
