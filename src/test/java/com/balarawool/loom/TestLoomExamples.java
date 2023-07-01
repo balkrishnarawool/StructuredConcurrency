@@ -2,11 +2,7 @@ package com.balarawool.loom;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-public class TestLoom {
+public class TestLoomExamples {
     @Test
     public void createEvent() {
         LoomExamples.createEvent();

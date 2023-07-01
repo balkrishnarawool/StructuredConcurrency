@@ -1,44 +1,19 @@
-# CompletableFuture vs. Structured Concurrency
+# CompletableFuture vs. Structured Concurrency API
 
-Some examples of async use-cases implemented using CompletableFuture and equivalent implementations using Structured Concurrency.
-Structured concurrency will be available in future versions of Java (> 19).
+``CompletableFuture`` provides API for asynchronous processing. It is a powerful API with which you can chain multiple stages to create a pipeline. It relies on callbacks, as the stages are implemented with callbacks.
 
-> ### Note:
-> If you want to run these examples, see the requirements at the bottom of this page.
+Structured Concurrency, on the other hand, provides an API that makes code imperative. 
 
-## Example 1:
-Sequence of tasks:
+This repo is part of my talk 'Structured Concurrency in Java: The what and the why'. The examples discussed in the talk are implemented here.
 
-With ``CompletableFuture``:
+There are 3 examples: Event management, Weather service and Banking portal
+The class ``CFExamples`` implements these examples using ``CompletableFuture`` and ``LoomExamples`` class implements then using structured concurrency API.
 
-    public static void sequence() {
-        var future = CompletableFuture.supplyAsync(GamesUtil::getPlayer)
-            .thenApply(GamesUtil.Player::performance)
-            .thenApply(GamesUtil.Performance::scores)
-            .thenApply(scores -> scores.stream().map(GamesUtil.Score::runs).filter(i -> i >= 100).count());
-        System.out.println("Centuries: " + future.join());
-    }
+## Example 1: Event management
+Execute all sub tasks.
+With ``CompletableFuture``, it looks like this:
 
-Equivalent code with structured concurrency is:
-
-    public static void sequence() {
-        var player = GamesUtil.getPlayer();
-        var centuries = player.performance()
-                .scores()
-                .stream()
-                .map(GamesUtil.Score::runs)
-                .filter(i -> i >= 100)
-                .count();
-        System.out.println("Centuries: " + centuries);
-    }
-
-
-## Example 2:
-Execute all sub tasks:
-
-With ``CompletableFuture``:
-
-    public static void allOf() {
+    public static void createEvent() {
         var future1 = CompletableFuture.supplyAsync(EventUtil::reserveVenue);
         var future2 = CompletableFuture.supplyAsync(EventUtil::bookHotel);
         var future3 = CompletableFuture.supplyAsync(EventUtil::buySupplies);
@@ -57,17 +32,17 @@ With ``CompletableFuture``:
 
 Equivalent code with structured concurrency is:
 
-    public static void allOf() {
+    public static void createEvent() {
         try(var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            var future1 = scope.fork(EventUtil::reserveVenue);
-            var future2 = scope.fork(EventUtil::bookHotel);
-            var future3 = scope.fork(EventUtil::buySupplies);
+            var task1 = scope.fork(EventUtil::reserveVenue);
+            var task2 = scope.fork(EventUtil::bookHotel);
+            var task3 = scope.fork(EventUtil::buySupplies);
 
             scope.join();
 
-            var venue = future1.resultNow();
-            var hotel = future2.resultNow();
-            var supplies = future3.resultNow();
+            var venue = task1.get();
+            var hotel = task2.get();
+            var supplies = task3.get();
 
             System.out.println("Event: " + new EventUtil.Event(venue, hotel, supplies));
         } catch (InterruptedException e) {
@@ -76,75 +51,91 @@ Equivalent code with structured concurrency is:
     }
 
 
-## Example 3:
+## Example 2: Weather service
 Execute at least one sub task:
 
-With ``CompletableFuture``:
+With ``CompletableFuture``, it looks like this:
 
-    public static void anyOf() {
-        var future1 = CompletableFuture.supplyAsync(() -> StockUtil.getPriceFromSource1("APPL"));
-        var future2 = CompletableFuture.supplyAsync(() -> StockUtil.getPriceFromSource2("APPL"));
-        var future3 = CompletableFuture.supplyAsync(() -> StockUtil.getPriceFromSource3("APPL"));
+    public static void getWeather() {
+        var future1 = CompletableFuture.supplyAsync(() -> WeatherUtil.getWeatherFromSource1("Amsterdam"));
+        var future2 = CompletableFuture.supplyAsync(() -> WeatherUtil.getWeatherFromSource2("Amsterdam"));
+        var future3 = CompletableFuture.supplyAsync(() -> WeatherUtil.getWeatherFromSource3("Amsterdam"));
 
         CompletableFuture.anyOf(future1, future2, future3)
-                .thenAccept(price -> System.out.println("Price: " + price))
+                .exceptionally(th -> {
+                    throw new RuntimeException(th);
+                })
+                .thenAccept(weather -> System.out.println("Weather: " + weather))
                 .join();
     }
 
 And with structured concurrency:
 
-    public static void anyOf() {
-        try(var scope = new StructuredTaskScope.ShutdownOnSuccess<StockUtil.Price>()) {
-            scope.fork(() -> StockUtil.getPriceFromSource1("APPL"));
-            scope.fork(() -> StockUtil.getPriceFromSource2("APPL"));
-            scope.fork(() -> StockUtil.getPriceFromSource3("APPL"));
+    public static void getWeather() {
+        try (var scope = new StructuredTaskScope.ShutdownOnSuccess<WeatherUtil.Weather>()) {
+            scope.fork(() -> WeatherUtil.getWeatherFromSource1("Amsterdam"));
+            scope.fork(() -> WeatherUtil.getWeatherFromSource2("Amsterdam"));
+            scope.fork(() -> WeatherUtil.getWeatherFromSource3("Amsterdam"));
 
-            var price = scope.join().result(RuntimeException::new);
-
-            System.out.println("Price: "+ price);
-        } catch (InterruptedException e) {
+            var weather = scope.join().result();
+            System.out.println(weather);
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
-## Example 4:
+## Example 3: Banking portal
 Combine multiple sub tasks:
 
-With ``CompletableFuture``:
+With ``CompletableFuture``, it looks like this:
 
-    public static void thenCombine() {
+    public static void getOfferForCustomer() {
         var future1 = CompletableFuture.supplyAsync(CustomerUtil::getCurrentCustomer);
-        var future2 = future1.thenApply(CustomerUtil::getSavingsData);
-        var future3 = future1.thenApply(CustomerUtil::getLoansData);
+        var future2 = future1.thenApplyAsync(CustomerUtil::getSavingsData);
+        var future3 = future1.thenApplyAsync(CustomerUtil::getLoansData);
 
-        var future = future2.thenCombine(future3, (savings, loans) -> new CustomerDetails(savings, loans));
+        var customer = future1
+                .exceptionally(th -> { throw new RuntimeException(th); })
+                .join();
+        var future = future2
+                .thenCombine(future3, ((savings, loans) -> new CustomerDetails(customer, savings, loans)))
+                .thenApplyAsync(CustomerUtil::calculateOffer)
+                .exceptionally(th -> { throw new RuntimeException(th); });
 
-        System.out.println("Customer details: " + future.join());
+        System.out.println("Offer: " + future.join());
     }
 
 And with structured concurrency:
 
-    public static void thenCombine() {
+    public static void getOfferForCustomer() {
         var customer = CustomerUtil.getCurrentCustomer();
 
         try(var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            var future2 = scope.fork(() -> CustomerUtil.getSavingsData(customer));
-            var future3 = scope.fork(() -> CustomerUtil.getLoansData(customer));
+            var task1 = scope.fork(() -> CustomerUtil.getSavingsData(customer));
+            var task2 = scope.fork(() -> CustomerUtil.getLoansData(customer));
 
-            scope.join();
+            scope.join().throwIfFailed();
+            var savings = task1.get();
+            var loans = task2.get();
 
-            var savings = future2.resultNow();
-            var loans = future3.resultNow();
+            var details = new CustomerUtil.CustomerDetails(customer, savings, loans);
 
-            System.out.println("Customer details: " + new CustomerUtil.CustomerDetails(savings, loans));
-        } catch (InterruptedException e) {
+            var offer = CustomerUtil.calculateOffer(details);
+            System.out.println(offer);
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
+There are two main differences:
+- ``CompletableFuture`` uses asynchronous mechanism and callbacks to implement pipelines. Whereas structured concurrency makes code imperative. Because of this, the code with structured concurrency is often more readable than the one with ``CompletableFuture``.
+- Also, ``CompletableFuture`` relies on lambdas which means we can only throw ``RuntimeException``-s. Structured concurrency uses checked exceptions. ``CompletionException`` used by ``CompletableFuture`` is ``RuntimeException``. Whereas ``ExecutionException`` used by structured concurrency is checked exception. This means with structured concurrency, you are forced to catch these exceptions ans handle the error scenarios.
+
+Besides these differences, we see some peculiar situations and quirks of ``CompletableFuture`` and structured concurrency API during the talk.
+
 ## Pre-requisites:
 
-- Project Loom early access build.
+- JDK early access build.
 You would need get early access build with support for structured concurrency.
 You can get one from here: https://jdk.java.net/21/
 These are builds based on JDK 21.
@@ -152,8 +143,5 @@ These are builds based on JDK 21.
 - Make sure you use ``--enable-preview`` for build and run.
 If you are using IntelliJ:
     - Make sure to enable preview for Java Compiler:
-  
-  ![Java Compiler Settings](./images/java_compiler_settings.png)
     - Make sure to enbale preview in 'Run Configurations...'
-  
-  ![Run Configurations Settings](./images/run_configurations_settings.png)
+
