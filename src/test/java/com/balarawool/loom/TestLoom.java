@@ -2,31 +2,25 @@ package com.balarawool.loom;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class TestLoom {
+    @Test
+    public void createEvent() {
+        LoomExamples.createEvent();
+    }
 
     @Test
-    public void sequence() {
+    public void getWeather() {
+        LoomExamples.getWeather();
+    }
+
+    @Test
+    public void getOfferForCustomer() {
         try {
-            Thread.startVirtualThread(LoomExamples::sequence).join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Test
-    public void allOf() {
-        LoomExamples.allOf();
-    }
-
-    @Test
-    public void anyOf() {
-        LoomExamples.anyOf();
-    }
-
-    @Test
-    public void thenCombine() {
-        try {
-            Thread.startVirtualThread(LoomExamples::thenCombine).join();
+            Thread.startVirtualThread(LoomExamples::getOfferForCustomer).join();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

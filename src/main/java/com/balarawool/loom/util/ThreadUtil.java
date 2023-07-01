@@ -1,8 +1,9 @@
 package com.balarawool.loom.util;
 
 public class ThreadUtil {
-    public static void logAndWait(String task, long delay) {
-        System.out.println("Thread: " + getThreadName() + " Performing task: " + task+"()");
+    public static void logAndWait(String task) {
+        long delay = (long)(Math.random() * 10);
+        System.out.println("Thread: " + getThreadName() + " Performing task: " + task + "() will take " + delay + " seconds");
         try {
             Thread.sleep(delay * 1_000);
             System.out.println("Done task: " + task + "()");

@@ -1,71 +1,60 @@
 package com.balarawool.loom;
 
-import com.balarawool.loom.util.EventUtil;
 import com.balarawool.loom.util.CustomerUtil;
-import com.balarawool.loom.util.CustomerUtil.CustomerDetails;
-import com.balarawool.loom.util.GamesUtil;
-import com.balarawool.loom.util.StockUtil;
-import jdk.incubator.concurrent.StructuredTaskScope;
+import com.balarawool.loom.util.EventUtil;
+import com.balarawool.loom.util.WeatherUtil;
+import java.util.concurrent.StructuredTaskScope;
+
+import java.util.concurrent.ExecutionException;
 
 public class LoomExamples {
+    public static void createEvent() {
+        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+            var task1 = scope.fork(EventUtil::reserveVenue);
+            var task2 = scope.fork(EventUtil::bookHotel);
+            var task3 = scope.fork(EventUtil::buySupplies);
 
-    public static void sequence() {
-        var player = GamesUtil.getPlayer();
-        var centuries = player.performance()
-                .scores()
-                .stream()
-                .map(GamesUtil.Score::runs)
-                .filter(i -> i >= 100)
-                .count();
-        System.out.println("Centuries: " + centuries);
-    }
+            scope.join().throwIfFailed();
 
-    public static void allOf() {
-        try(var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            var future1 = scope.fork(EventUtil::reserveVenue);
-            var future2 = scope.fork(EventUtil::bookHotel);
-            var future3 = scope.fork(EventUtil::buySupplies);
+            var venue = task1.get();
+            var hotel = task2.get();
+            var supplies = task3.get();
 
-            scope.join();
-
-            var venue = future1.resultNow();
-            var hotel = future2.resultNow();
-            var supplies = future3.resultNow();
-
-            System.out.println("Event: " + new EventUtil.Event(venue, hotel, supplies));
-        } catch (InterruptedException e) {
+            System.out.println(new EventUtil.Event(venue, hotel, supplies));
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static void anyOf() {
-        try(var scope = new StructuredTaskScope.ShutdownOnSuccess<StockUtil.Price>()) {
-            scope.fork(() -> StockUtil.getPriceFromSource1("APPL"));
-            scope.fork(() -> StockUtil.getPriceFromSource2("APPL"));
-            scope.fork(() -> StockUtil.getPriceFromSource3("APPL"));
+    public static void getWeather() {
+        try (var scope = new StructuredTaskScope.ShutdownOnSuccess<WeatherUtil.Weather>()) {
+            scope.fork(() -> WeatherUtil.getWeatherFromSource1("Amsterdam"));
+            scope.fork(() -> WeatherUtil.getWeatherFromSource2("Amsterdam"));
+            scope.fork(() -> WeatherUtil.getWeatherFromSource3("Amsterdam"));
 
-            var price = scope.join().result(RuntimeException::new);
-
-            System.out.println("Price: "+ price);
-        } catch (InterruptedException e) {
+            var weather = scope.join().result();
+            System.out.println(weather);
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static void thenCombine() {
+    public static void getOfferForCustomer() {
         var customer = CustomerUtil.getCurrentCustomer();
 
         try(var scope = new StructuredTaskScope.ShutdownOnFailure()) {
-            var future2 = scope.fork(() -> CustomerUtil.getSavingsData(customer));
-            var future3 = scope.fork(() -> CustomerUtil.getLoansData(customer));
+            var task1 = scope.fork(() -> CustomerUtil.getSavingsData(customer));
+            var task2 = scope.fork(() -> CustomerUtil.getLoansData(customer));
 
-            scope.join();
+            scope.join().throwIfFailed();
+            var savings = task1.get();
+            var loans = task2.get();
 
-            var savings = future2.resultNow();
-            var loans = future3.resultNow();
+            var details = new CustomerUtil.CustomerDetails(customer, savings, loans);
 
-            System.out.println("Customer details: " + new CustomerDetails(savings, loans));
-        } catch (InterruptedException e) {
+            var offer = CustomerUtil.calculateOffer(details);
+            System.out.println(offer);
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }

@@ -3,25 +3,18 @@ package com.balarawool.loom;
 import org.junit.jupiter.api.Test;
 
 public class TestCFExamples {
-
     @Test
-    public void sequence() {
-        CFExamples.sequence();
+    public void createEvent() {
+        CFExamples.createEvent();
     }
 
     @Test
-    public void allOf() {
-        CFExamples.allOf();
+    public void getWeather() {
+        CFExamples.getWeather();
     }
 
     @Test
-    public void anyOf() {
-        CFExamples.anyOf();
+    public void getOfferForCustomer() {
+        CFExamples.getOfferForCustomer();
     }
-
-    @Test
-    public void thenCombine() {
-        CFExamples.thenCombine();
-    }
-
 }

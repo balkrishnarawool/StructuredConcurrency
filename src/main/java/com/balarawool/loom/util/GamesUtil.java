@@ -7,7 +7,7 @@ import static com.balarawool.loom.util.ThreadUtil.logAndWait;
 public class GamesUtil {
 
     public static Player getPlayer() {
-        logAndWait("getPlayer", 5);
+        logAndWait("getPlayer");
         return new Player("Virat Kohli", new Performance(List.of(new Score(87), new Score(97), new Score(107), new Score(37), new Score(127))));
     }
 

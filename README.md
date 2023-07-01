@@ -146,8 +146,8 @@ And with structured concurrency:
 
 - Project Loom early access build.
 You would need get early access build with support for structured concurrency.
-You can get one from here: https://jdk.java.net/loom/
-These are builds based on JDK 20.
+You can get one from here: https://jdk.java.net/21/
+These are builds based on JDK 21.
 
 - Make sure you use ``--enable-preview`` for build and run.
 If you are using IntelliJ:

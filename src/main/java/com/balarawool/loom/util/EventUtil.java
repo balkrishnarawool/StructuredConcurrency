@@ -5,17 +5,17 @@ import static com.balarawool.loom.util.ThreadUtil.logAndWait;
 public class EventUtil {
 
     public static Venue reserveVenue() {
-        logAndWait("reserveVenue", 2);
+        logAndWait("reserveVenue");
         return new Venue();
     }
 
     public static Hotel bookHotel() {
-        logAndWait("bookHotel", 1);
+        logAndWait("bookHotel");
         return new Hotel();
     }
 
     public static Supplies buySupplies() {
-        logAndWait("buySupplies", 5);
+        logAndWait("buySupplies");
         return new Supplies();
     }
 
