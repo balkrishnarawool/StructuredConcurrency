@@ -1,6 +1,6 @@
 # CompletableFuture vs. Structured Concurrency API
 
-``CompletableFuture`` provides API for asynchronous processing. It is a powerful API with which you can chain multiple stages to create a pipeline. It relies on callbacks, as the stages are implemented with callbacks.
+``CompletableFuture`` provides API for asynchronous processing. It is qiite a powerful API and using it, you can chain multiple "stages" to create a pipeline. It relies heavily on callbacks, as the stages are executed asynchronously.
 
 Structured Concurrency, on the other hand, provides an API that makes code imperative. 
 
