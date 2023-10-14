@@ -4,13 +4,13 @@ import org.junit.jupiter.api.Test;
 
 public class TestCFExamples {
     @Test
-    public void createEvent() {
-        CFExamples.createEvent();
+    public void getAverageTemperature() {
+        CFExamples.getAverageTemperature();
     }
 
     @Test
-    public void getWeather() {
-        CFExamples.getWeather();
+    public void getFirstTemperature() {
+        CFExamples.getFirstTemperature();
     }
 
     @Test

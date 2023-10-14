@@ -4,14 +4,18 @@ import java.util.concurrent.Executors;
 
 public class ThreadExamples {
     public static void platformThread() {
-        Thread.ofPlatform().start(() -> System.out.println(Thread.currentThread()));
+    	var t = Thread.ofPlatform().start(() -> System.out.println(Thread.currentThread()));
     }
 
     public static void virtualThread() {
-        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            executor.submit(() -> System.out.println(Thread.currentThread()));
-            executor.submit(() -> System.out.println(Thread.currentThread()));
-            executor.submit(() -> System.out.println(Thread.currentThread()));
-        }
+    	try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    		executor.submit(() -> System.out.println(Thread.currentThread()));
+    		executor.submit(() -> System.out.println(Thread.currentThread()));
+    		executor.submit(() -> System.out.println(Thread.currentThread()));
+    		executor.submit(() -> System.out.println(Thread.currentThread()));
+    		executor.submit(() -> System.out.println(Thread.currentThread()));
+    		executor.submit(() -> System.out.println(Thread.currentThread()));
+    		executor.submit(() -> System.out.println(Thread.currentThread()));
+    	}
     }
 }

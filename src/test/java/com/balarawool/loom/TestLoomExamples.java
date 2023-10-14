@@ -4,13 +4,13 @@ import org.junit.jupiter.api.Test;
 
 public class TestLoomExamples {
     @Test
-    public void createEvent() {
-        LoomExamples.createEvent();
+    public void getAverageTemperature() {
+        LoomExamples.getAverageTemperature();
     }
 
     @Test
-    public void getWeather() {
-        LoomExamples.getWeather();
+    public void getFirstTemperature() {
+        LoomExamples.getFirstTemperature();
     }
 
     @Test

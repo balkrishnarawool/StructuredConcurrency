@@ -7,36 +7,35 @@ import com.balarawool.loom.util.WeatherUtil;
 
 import java.util.concurrent.CompletableFuture;
 public class CFExamples {
-    public static void createEvent() {
-        var future1 = CompletableFuture.supplyAsync(EventUtil::reserveVenue);
-        var future2 = CompletableFuture.supplyAsync(EventUtil::bookHotel);
-        var future3 = CompletableFuture.supplyAsync(EventUtil::buySupplies);
+	public static void getAverageTemperature() {
+        var future1 = CompletableFuture.supplyAsync(WeatherUtil::getTemperatureFromSource1);
+        var future2 = CompletableFuture.supplyAsync(WeatherUtil::getTemperatureFromSource2);
+        var future3 = CompletableFuture.supplyAsync(WeatherUtil::getTemperatureFromSource3);
 
-        var futureEvent = CompletableFuture.allOf(future1, future2, future3)
+        CompletableFuture.allOf(future1, future2, future3)
                 .exceptionally(th -> {
                     throw new RuntimeException(th);
                 })
-                .thenApply(ignored -> {
-                    var venue = future1.join();
-                    var hotel = future2.join();
-                    var supplies = future3.join();
-
-                    return new EventUtil.Event(venue, hotel, supplies);
-                });
-
-        System.out.println("Event : " + futureEvent.join());
+                .thenAccept(ignored -> {
+                	var temp1 = future1.join();
+                	var temp2 = future2.join();
+                	var temp3 = future3.join();
+                	
+                	System.out.println("Average temperature: " + (double)(temp1 + temp2 + temp3) / 3);
+                })
+                .join();
     }
 
-    public static void getWeather() {
-        var future1 = CompletableFuture.supplyAsync(() -> WeatherUtil.getWeatherFromSource1("Amsterdam"));
-        var future2 = CompletableFuture.supplyAsync(() -> WeatherUtil.getWeatherFromSource2("Amsterdam"));
-        var future3 = CompletableFuture.supplyAsync(() -> WeatherUtil.getWeatherFromSource3("Amsterdam"));
+    public static void getFirstTemperature() {
+        var future1 = CompletableFuture.supplyAsync(WeatherUtil::getTemperatureFromSource1);
+        var future2 = CompletableFuture.supplyAsync(WeatherUtil::getTemperatureFromSource2);
+        var future3 = CompletableFuture.supplyAsync(WeatherUtil::getTemperatureFromSource3);
 
         CompletableFuture.anyOf(future1, future2, future3)
                 .exceptionally(th -> {
                     throw new RuntimeException(th);
                 })
-                .thenAccept(weather -> System.out.println("Weather: " + weather))
+                .thenAccept(temperature -> System.out.println("Temperature: " + temperature))
                 .join();
     }
 
@@ -46,12 +45,16 @@ public class CFExamples {
         var future3 = future1.thenApplyAsync(CustomerUtil::getLoansData);
 
         var customer = future1
-                .exceptionally(th -> { throw new RuntimeException(th); })
+                .exceptionally(th -> { 
+                	throw new RuntimeException(th); 
+                })
                 .join();
         var future = future2
                 .thenCombine(future3, ((savings, loans) -> new CustomerDetails(customer, savings, loans)))
                 .thenApplyAsync(CustomerUtil::calculateOffer)
-                .exceptionally(th -> { throw new RuntimeException(th); });
+                .exceptionally(th -> { 
+                	throw new RuntimeException(th); 
+                });
 
         System.out.println("Offer: " + future.join());
     }

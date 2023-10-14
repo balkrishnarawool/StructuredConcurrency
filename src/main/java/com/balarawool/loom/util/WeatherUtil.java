@@ -4,21 +4,29 @@ import static com.balarawool.loom.util.ThreadUtil.logAndWait;
 
 public class WeatherUtil {
 
-    public static Weather getWeatherFromSource1(String city) {
-        logAndWait("getWeatherFromSource1");
-        return new Weather("25 C");
+    public static int getTemperatureFromSource1() {
+    	throw new RuntimeException();
+//        logAndWait("getTemperatureFromSource1");
+//        return randomTemp("getTemperatureFromSource1");
     }
 
-    public static Weather getWeatherFromSource2(String city) {
-        logAndWait("getWeatherFromSource2");
-        return new Weather("26 C");
+	public static int getTemperatureFromSource2() {
+        logAndWait("getTemperatureFromSource2");
+        return randomTemp("getTemperatureFromSource2");
     }
 
-    public static Weather getWeatherFromSource3(String city) {
-        logAndWait("getWeatherFromSource3");
-        return new Weather("27 C");
+    public static int getTemperatureFromSource3() {
+        logAndWait("getTemperatureFromSource3");
+        return randomTemp("getTemperatureFromSource3");
     }
+    
+    private static int randomTemp(String task) {
+    	int temp = (int) (20 + 10 * Math.random());
+        System.out.println(task + " returns " +  temp);
+        return temp;
+	}
 
-    public record Weather(String temperature) {}
+
+    public record Weather(int temperature) {}
 
 }
