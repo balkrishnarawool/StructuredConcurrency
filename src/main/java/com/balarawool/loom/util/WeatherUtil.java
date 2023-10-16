@@ -5,9 +5,8 @@ import static com.balarawool.loom.util.ThreadUtil.logAndWait;
 public class WeatherUtil {
 
     public static int getTemperatureFromSource1() {
-    	throw new RuntimeException();
-//        logAndWait("getTemperatureFromSource1");
-//        return randomTemp("getTemperatureFromSource1");
+        logAndWait("getTemperatureFromSource1");
+        return randomTemp("getTemperatureFromSource1");
     }
 
 	public static int getTemperatureFromSource2() {

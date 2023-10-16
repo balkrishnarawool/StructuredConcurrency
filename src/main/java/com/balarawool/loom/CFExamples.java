@@ -2,7 +2,6 @@ package com.balarawool.loom;
 
 import com.balarawool.loom.util.CustomerUtil;
 import com.balarawool.loom.util.CustomerUtil.CustomerDetails;
-import com.balarawool.loom.util.EventUtil;
 import com.balarawool.loom.util.WeatherUtil;
 
 import java.util.concurrent.CompletableFuture;
