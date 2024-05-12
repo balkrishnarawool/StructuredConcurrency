@@ -31,10 +31,10 @@ public class LoomExamples {
     }
 
     public static void getWeather() {
-        try (var scope = new StructuredTaskScope.ShutdownOnSuccess<WeatherUtil.Weather>()) {
-            scope.fork(() -> WeatherUtil.getWeatherFromSource1("Amsterdam"));
-            scope.fork(() -> WeatherUtil.getWeatherFromSource2("Amsterdam"));
-            scope.fork(() -> WeatherUtil.getWeatherFromSource3("Amsterdam"));
+        try (var scope = new StructuredTaskScope.ShutdownOnSuccess<Weather>()) {
+            scope.fork(() -> WeatherUtil.getWeatherFromSource1("Cologne"));
+            scope.fork(() -> WeatherUtil.getWeatherFromSource2("Cologne"));
+            scope.fork(() -> WeatherUtil.getWeatherFromSource3("Cologne"));
 
             var weather = scope.join().result();
             System.out.println(weather);
@@ -45,22 +45,22 @@ public class LoomExamples {
 
     public static void getOfferForCustomer() {
     	var customer = CustomerUtil.getCurrentCustomer();
-    	
+
     	try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
     		var task1 = scope.fork(() -> CustomerUtil.getSavingsData(customer));
     		var task2 = scope.fork(() -> CustomerUtil.getLoansData(customer));
-    		
+
     		scope.join().throwIfFailed();
-    		
+
     		var savings = task1.get();
     		var loaans = task2.get();
     		var customerDetails = new CustomerDetails(customer, savings, loaans);
-    		
+
     		var offer = CustomerUtil.calculateOffer(customerDetails);
-    		
+
     		System.out.println(offer);
     	} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
+            throw new RuntimeException(e);
 		}
     }
 }
