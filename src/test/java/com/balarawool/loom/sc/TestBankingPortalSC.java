@@ -1,18 +1,8 @@
-package com.balarawool.loom;
+package com.balarawool.loom.sc;
 
 import org.junit.jupiter.api.Test;
 
-public class TestLoomExamples {
-    @Test
-    public void createEvent() {
-        LoomExamples.createEvent();
-    }
-
-    @Test
-    public void getWeather() {
-        LoomExamples.getWeather();
-    }
-
+public class TestBankingPortalSC {
     @Test
     public void getOfferForCustomer() {
         try {
@@ -21,5 +11,4 @@ public class TestLoomExamples {
             throw new RuntimeException(e);
         }
     }
-
 }
