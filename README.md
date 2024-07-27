@@ -1,10 +1,16 @@
+# Structured Concurrency in Java
+This repo provides examples for
+- Comparision between CompletableFuture API and Structured Concurrency API
+- Implementing miscellaneous scenarios with Structured Concurreny API
+  
 # CompletableFuture vs. Structured Concurrency API
 
 ``CompletableFuture`` provides API for asynchronous processing. It is qiite a powerful API and using it, you can chain multiple "stages" to create a pipeline. It relies heavily on callbacks, as the stages are executed asynchronously.
 
 Structured Concurrency, on the other hand, provides an API that makes code imperative. 
 
-This repo is part of my talk 'Structured Concurrency in Java: The what and the why'. The examples discussed in the talk are implemented here.
+Examples for these are present in package `com.balarawool.loom.cf_vs_sc`.
+This is part of my talk 'Structured Concurrency in Java: The what and the why'. The examples discussed in the talk are implemented here.
 
 There are 3 examples: Event management, Weather service and Banking portal
 The class ``CFExamples`` implements these examples using ``CompletableFuture`` and ``LoomExamples`` class implements then using structured concurrency API.
@@ -133,15 +139,16 @@ There are two main differences:
 
 Besides these differences, we see some peculiar situations and quirks of ``CompletableFuture`` and structured concurrency API during the talk.
 
+
+# Implementing miscellaneous scenarios with Structured Concurreny API
+These examples are present in the package `com.balarawool.loom.misc_examples`. I'll write more about them later.
+There are still things todo in those examples.
+
 ## Pre-requisites:
 
-- JDK early access build.
-You would need get early access build with support for structured concurrency.
-You can get one from here: https://jdk.java.net/21/
-These are builds based on JDK 21.
+- Make sure to use JDK 21 or higher.
 
 - Make sure you use ``--enable-preview`` for build and run.
 If you are using IntelliJ:
     - Make sure to enable preview for Java Compiler:
     - Make sure to enbale preview in 'Run Configurations...'
-
