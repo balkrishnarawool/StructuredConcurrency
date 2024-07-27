@@ -1,7 +1,7 @@
 # Structured Concurrency in Java
 This repo provides examples for
 - Comparision between CompletableFuture API and Structured Concurrency API
-- Implementing miscellaneous scenarios with Structured Concurreny API
+- Implementing miscellaneous scenarios with Structured Concurrency API
   
 # CompletableFuture vs. Structured Concurrency API
 
@@ -140,7 +140,13 @@ There are two main differences:
 Besides these differences, we see some peculiar situations and quirks of ``CompletableFuture`` and structured concurrency API during the talk.
 
 
-# Implementing miscellaneous scenarios with Structured Concurreny API
+# Implementing miscellaneous scenarios with Structured Concurrency API
+I have implemented few examples using Structured Concurrency API which deal with:
+- coordinated scheduling
+- cancellations
+- timeouts
+- graceful shutdown
+
 These examples are present in the package `com.balarawool.loom.misc_examples`. I'll write more about them later.
 There are still things todo in those examples.
 
