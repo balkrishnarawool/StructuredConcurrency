@@ -4,8 +4,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.StructuredTaskScope;
 
 // Example of graceful shutdown (a shutdown where resources are closed).
-// When you run this class, it creates a scope (with nested scope) and one of the tasks in this scope throws Exception, so it gets cancelled.
-// It closes the scope (and nested scopes) and closes all resources.
+// When you run this class, and call "kill -2 PID" or "kill -15 PID", it interrupts the app (read SimpleResourceExample)
+// and it closes the scope (and nested scopes). It also closes all resources.
+//
 // It works now but the part (look at GracefulShutdownScope constructor) that ensures the thread is terminated is kinda hacky.
 // TODO: Make this^ part better.
 // TODO: The order in which Resources are closed, should be proper.
