@@ -6,7 +6,7 @@ public class TestBankingPortalSC {
     @Test
     public void getOfferForCustomer() {
         try {
-            Thread.startVirtualThread(LoomExamples::getOfferForCustomer).join();
+            Thread.startVirtualThread(BankingPortalSC::getOfferForCustomer).join();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
