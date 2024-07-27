@@ -10,7 +10,7 @@ This repo provides examples for
 Structured Concurrency, on the other hand, provides an API that makes code imperative. 
 
 Examples for these are present in package `com.balarawool.loom.cf_vs_sc`.
-This is part of my talk 'Structured Concurrency in Java: The what and the why'. The examples discussed in the talk are implemented here.
+This is part of my talk [Structured Concurrency in Java: The what and the why](https://www.youtube.com/watch?v=fbI3qveS_Is). The examples discussed in the talk are implemented here. If you have any questions/ feedback, do reach me out [@BalaRawool](https://twitter.com/@BalaRawool).
 
 There are 3 examples: Event management, Weather service and Banking portal
 The class ``CFExamples`` implements these examples using ``CompletableFuture`` and ``LoomExamples`` class implements then using structured concurrency API.
