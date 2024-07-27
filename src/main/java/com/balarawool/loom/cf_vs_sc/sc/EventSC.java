@@ -1,4 +1,4 @@
-package com.balarawool.loom.sc;
+package com.balarawool.loom.cf_vs_sc.sc;
 
 import com.balarawool.loom.util.EventUtil;
 import com.balarawool.loom.util.EventUtil.Event;

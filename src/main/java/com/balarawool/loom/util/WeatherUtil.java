@@ -9,6 +9,10 @@ public class WeatherUtil {
         return new Weather("25 C");
     }
 
+    public static Weather getWeatherFromSource1WithError(String city) {
+        throw new RuntimeException("Exception while getting weather from Source 1");
+    }
+
     public static Weather getWeatherFromSource2(String city) {
         logAndWait("getWeatherFromSource2");
         return new Weather("26 C");

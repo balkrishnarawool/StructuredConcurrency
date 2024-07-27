@@ -1,4 +1,4 @@
-package com.balarawool.loom.cf;
+package com.balarawool.loom.cf_vs_sc.cf;
 
 import com.balarawool.loom.util.CustomerUtil;
 import com.balarawool.loom.util.CustomerUtil.CustomerDetails;
