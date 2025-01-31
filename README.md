@@ -152,7 +152,7 @@ There are still things todo in those examples.
 
 ## Pre-requisites:
 
-- Make sure to use JDK 21 or higher.
+- Make sure to use Loom early-access build of JDK 24 (https://jdk.java.net/loom/).
 
 - Make sure you use ``--enable-preview`` for build and run.
 If you are using IntelliJ:

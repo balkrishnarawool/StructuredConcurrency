@@ -3,16 +3,15 @@ package com.balarawool.loom.misc_examples.timeout;
 import com.balarawool.loom.util.EventUtil;
 import com.balarawool.loom.util.EventUtil.Event;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.StructuredTaskScope;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.StructuredTaskScope.Config;
+import java.util.concurrent.StructuredTaskScope.Joiner;
+import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static java.time.temporal.ChronoUnit.SECONDS;
 
 // Example of individual task timeouts.
 // This works but not exactly as expected.
@@ -23,51 +22,63 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 
 public class IndividualTaskTimeoutsExample {
     public static void createEvent() {
-        try (var scope = new ShutdownOnFailureWithTimeouts()) {
-            Supplier<EventUtil.Venue> task1 = scope.fork(EventUtil::reserveVenue, Time.after(5, SECONDS));
-            Supplier<EventUtil.Hotel> task2 = scope.fork(EventUtil::bookHotel, Time.after(6, SECONDS));
-            Supplier<EventUtil.Supplies> task3 = scope.fork(EventUtil::buySupplies, Time.after(4, SECONDS));
+        try (var scope = ScopeWithTaskTimeouts.open(Joiner.allSuccessfulOrThrow(), config -> config.withTimeout(Duration.ofSeconds(20)))) {
+            Supplier<EventUtil.Venue> task1 = scope.fork(EventUtil::reserveVenue, Duration.ofSeconds(5));
+            Supplier<EventUtil.Hotel> task2 = scope.fork(EventUtil::bookHotel, Duration.ofSeconds(6));
+            Supplier<EventUtil.Supplies> task3 = scope.fork(EventUtil::buySupplies, Duration.ofSeconds(4));
 
-            scope.joinUntil(Instant.now().plus(8, SECONDS));
+            scope.join();
 
             var venue = task1.get();
             var hotel = task2.get();
             var supplies = task3.get();
 
             System.out.println(new Event(venue, hotel, supplies));
-        } catch (InterruptedException | TimeoutException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static class ShutdownOnFailureWithTimeouts<U> extends StructuredTaskScope<U> implements AutoCloseable {
-        record ChildScope(StructuredTaskScope scope, Instant timeout) { }
-        List<ChildScope> childScopes = new ArrayList<>();
+    public static class ScopeWithTaskTimeouts<T, R> implements AutoCloseable {
+        private StructuredTaskScope<T, R> scope;
+        private List<StructuredTaskScope> childScopes;
 
-        public <U1> Supplier<U1> fork(Callable<U1> task, Instant instant) {
-            var scope = new StructuredTaskScope<U1>();
-            childScopes.add(new ChildScope(scope, instant));
-            var subTask = scope.fork(task::call);
-            return subTask::get;
+        private ScopeWithTaskTimeouts(Joiner joiner, Function<Config, Config> configFunction) {
+            scope = StructuredTaskScope.open(joiner, configFunction);
+            childScopes = new ArrayList<>();
         }
 
-        @Override
-        public ShutdownOnFailureWithTimeouts<U> joinUntil(Instant deadline) throws InterruptedException, TimeoutException {
-            for (var scope: childScopes) { scope.scope.joinUntil(scope.timeout); }
-            super.joinUntil(deadline);
-            return this;
+        public static ScopeWithTaskTimeouts open(Joiner joiner, Function<Config, Config> configFunction) {
+            return new ScopeWithTaskTimeouts(joiner, configFunction);
+        }
+
+        public StructuredTaskScope.Subtask<T> fork(Callable<T> task, Duration timeout) {
+            var tempScope = StructuredTaskScope.open(Joiner.allSuccessfulOrThrow(), config -> config.withTimeout(timeout));
+            System.out.println(tempScope);
+            childScopes.add(tempScope);
+            return tempScope.fork(task::call);
+        }
+
+        // TODO: BIG PROBLEM: The outer scope always throws TimeoutException even if all child scopes are successfully finished/joined and scope has still time.
+        // TODO: When scope's timeout is lower than one of child's timeout, it might not throw TimeoutException in time.
+        public R join() throws InterruptedException {
+            childScopes.stream().forEach(s -> {
+                try {
+                    System.out.println(s);
+                    s.join();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            return scope.join();
         }
 
         @Override
         public void close() {
-//            for (var scope: childScopes) { scope.scope.close(); } // This throws exception (on successful completion). Find out why.
-//            super.close(); // This throws exception (on successful completion). Find out why.
-        }
-    }
-
-    private static class Time {
-        private static Instant after(int duration, ChronoUnit unit) {
-            return Instant.now().plus(duration, unit);
+            scope.close();
+            // TODO Fix these:
+    //            for (var scope: childScopes) { scope.scope.close(); } // This throws exception (on successful completion). Find out why.
+    //            super.close(); // This throws exception (on successful completion). Find out why.
         }
     }
 }

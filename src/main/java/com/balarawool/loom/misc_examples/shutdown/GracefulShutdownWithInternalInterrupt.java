@@ -1,7 +1,7 @@
 package com.balarawool.loom.misc_examples.shutdown;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.StructuredTaskScope;
+import java.util.concurrent.StructuredTaskScope.Joiner;
 
 // Example of graceful shutdown (a shutdown where resources are closed).
 // When you run this class, it interrupts the main thread after 5 seconds
@@ -27,35 +27,35 @@ public class GracefulShutdownWithInternalInterrupt {
             }
         }).start();
 
-        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+        try (var scope = StructuredTaskScope.open(Joiner.anySuccessfulResultOrThrow())) {
             var task1 = scope.fork(() -> useResource(1));
             var task2 = scope.fork(() -> useResource(2));
             var task3 = scope.fork(GracefulShutdownWithInternalInterrupt::useMoreResources);
 
-            scope.join().throwIfFailed();
+            scope.join();
 
             var result1 = task1.get();
             var result2 = task2.get();
 
             System.out.println("Results: "+result1+" "+result2);
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
     private static int useMoreResources() {
-        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+        try (var scope = StructuredTaskScope.open(Joiner.anySuccessfulResultOrThrow())) {
             var task1 = scope.fork(() -> useResource(3));
             var task2 = scope.fork(() -> useResource(4));
 
-            scope.join().throwIfFailed();
+            scope.join();
 
             var result1 = task1.get();
             var result2 = task2.get();
 
             System.out.println("Results: "+result1+" "+result2);
             return 30;
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

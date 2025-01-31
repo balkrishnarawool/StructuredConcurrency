@@ -23,11 +23,11 @@ public class GracefulShutdownWithVirtualThread {
             }
         }));
 
-        try (var scope = new StructuredTaskScope()) {
+        try (var scope = StructuredTaskScope.open()) {
             var task1 = scope.fork(() -> useResource(1));
             var task2 = scope.fork(() -> useResource(2));
 
-            try (var scope2 = new StructuredTaskScope()) {
+            try (var scope2 = StructuredTaskScope.open()) {
                 var task3 = scope2.fork(() -> useResource(3));
                 var task4 = scope2.fork(() -> useResource(4));
 
