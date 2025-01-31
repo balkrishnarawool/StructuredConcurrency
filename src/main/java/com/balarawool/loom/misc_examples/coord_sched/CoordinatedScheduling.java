@@ -3,17 +3,8 @@ package com.balarawool.loom.misc_examples.coord_sched;
 import com.balarawool.loom.util.EventUtil;
 import com.balarawool.loom.util.EventUtil.Event;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.StructuredTaskScope;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Supplier;
-
-import static java.time.temporal.ChronoUnit.SECONDS;
+import java.util.concurrent.StructuredTaskScope.Joiner;
 
 // Example of Coordinated Scheduling.
 // To create an event we need all 3 of the following tasks to complete:
@@ -26,32 +17,32 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 //
 public class CoordinatedScheduling {
     public static void createEvent() {
-        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+        try (var scope = StructuredTaskScope.open()) {
             var task1 = scope.fork(EventUtil::reserveVenue);
             var task2 = scope.fork(EventUtil::buySupplies);
             var task3 = scope.fork(CoordinatedScheduling::bookAccommodation);
 
-            scope.join().throwIfFailed();
+            scope.join();
 
             var venue = task1.get();
             var supplies = task2.get();
             var hotel = task3.get();
 
             System.out.println(new Event(venue, hotel, supplies));
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
     private static EventUtil.Hotel bookAccommodation() {
-        try (var scope = new StructuredTaskScope.ShutdownOnSuccess<EventUtil.Hotel>()) {
+        try (var scope = StructuredTaskScope.open(Joiner.<EventUtil.Hotel>anySuccessfulResultOrThrow())) {
             var task1 = scope.fork(EventUtil::bookHotel);
             var task2 = scope.fork(EventUtil::bookAirbnb);
 
-            var hotel = scope.join().result();
+            var hotel = scope.join();
 
             return hotel;
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

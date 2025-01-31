@@ -8,6 +8,7 @@ class CancellationPropagationWithInterruptTest {
 
     @Test
     void createEvent() {
-        CancellationPropagationWithInterrupt.createEvent();
+        var ex = assertThrows(RuntimeException.class, CancellationPropagationWithInterrupt::createEvent);
+        assertTrue(ex.getMessage().contains("InterruptedException"));
     }
 }

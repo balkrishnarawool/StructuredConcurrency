@@ -3,8 +3,8 @@ package com.balarawool.loom.misc_examples.cancellation;
 import com.balarawool.loom.util.EventUtil;
 import com.balarawool.loom.util.EventUtil.Event;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.StructuredTaskScope;
+import java.util.concurrent.StructuredTaskScope.Joiner;
 
 // Example of cancellation propagation: When a task in a ShutdownOnFailure scope is cancelled due to an exception (RuntimeException), all other tasks are cancelled and all child-scopes are cancelled as well.
 // To create an event we need all 3 of the following tasks to complete:
@@ -23,32 +23,32 @@ import java.util.concurrent.StructuredTaskScope;
 //
 public class CancellationPropagationWithError {
     public static void createEvent() {
-        try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+        try (var scope = StructuredTaskScope.open()) {
             var task1 = scope.fork(EventUtil::reserveVenue);
             var task2 = scope.fork(EventUtil::buySuppliesWithError);
             var task3 = scope.fork(CancellationPropagationWithError::bookAccommodation);
 
-            scope.join().throwIfFailed();
+            scope.join();
 
             var venue = task1.get();
             var supplies = task2.get();
             var hotel = task3.get();
 
             System.out.println(new Event(venue, hotel, supplies));
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
     private static EventUtil.Hotel bookAccommodation() {
-        try (var scope = new StructuredTaskScope.ShutdownOnSuccess<EventUtil.Hotel>()) {
+        try (var scope = StructuredTaskScope.open(Joiner.<EventUtil.Hotel>anySuccessfulResultOrThrow())) {
             var task1 = scope.fork(EventUtil::bookHotel);
             var task2 = scope.fork(EventUtil::bookAirbnb);
 
-            var hotel = scope.join().result();
+            var hotel = scope.join();
 
             return hotel;
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
